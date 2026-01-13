@@ -1,0 +1,8 @@
+{
+  "configuration/entityTypes/HCP": {
+    "MiddleName": "Added middle name"
+  },
+  "configuration/entityTypes/HCO": {
+    "Fiscal": "Added fiscal"
+  }
+}

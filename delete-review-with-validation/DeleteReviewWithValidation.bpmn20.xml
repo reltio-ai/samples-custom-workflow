@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.activiti.org/test">
+  <process id="recommendForDelete" name="Recommend for Delete" isExecutable="true">
+    <startEvent id="startevent1" name="Start" />
+    <userTask id="deleteReview" name="Delete Review" activiti:candidateGroups="ROLE_REVIEWER" activiti:dueDate="P2D">
+      <extensionElements>
+        <activiti:formProperty id="decision" name="Decision" type="enum" required="true" default="Delete">
+          <activiti:value id="Delete" name="Delete" />
+          <activiti:value id="Cancel" name="Cancel" />
+        </activiti:formProperty>
+        <activiti:formProperty id="accessTypes" name="AccessTypes" type="string" writable="false" default="DELETE,READ" />
+        <activiti:formProperty id="validator" name="Validator" type="string" writable="false" default="com.company.workflow.delete.DeleteReviewValidator" />
+        <activiti:formProperty id="notificationOnAssignmentEnabled" name="NotificationOnAssignmentEnabled" type="boolean" writable="false" default="true" />
+        <activiti:formProperty id="notificationOnCompletionEnabled" name="NotificationOnCompletionEnabled" type="boolean" writable="false" default="true" />
+        <activiti:taskListener class="com.reltio.workflow.activiti.service.TaskStartEventListener" event="create" />
+        <activiti:taskListener class="com.reltio.workflow.activiti.service.TaskAssignmentEventListener" event="assignment" />
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="deleteReview" />
+    <serviceTask id="DeleteService" name="Delete Service" activiti:class="com.reltio.workflow.activiti.service.Delete" />
+    <sequenceFlow id="Delete" name="Delete" sourceRef="exclusivegateway1" targetRef="DeleteService">
+      <conditionExpression xsi:type="tFormalExpression">${decision=='Delete'}</conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway" />
+    <sequenceFlow id="flow2" sourceRef="deleteReview" targetRef="exclusivegateway1" />
+    <endEvent id="endevent1" name="End" />
+    <sequenceFlow id="flow3" sourceRef="DeleteService" targetRef="endevent1" />
+    <sequenceFlow id="Cancel" name="Cancel" sourceRef="exclusivegateway1" targetRef="endevent1">
+      <conditionExpression xsi:type="tFormalExpression">${decision=='Cancel'}</conditionExpression>
+    </sequenceFlow>
+    <dataObject id="manualStart" name="manualStart" itemSubjectRef="xsd:boolean">
+      <extensionElements>
+        <activiti:value>true</activiti:value>
+      </extensionElements>
+    </dataObject>
+    <dataObject id="deleted" name="deleted" itemSubjectRef="xsd:boolean">
+      <extensionElements>
+        <activiti:value>false</activiti:value>
+      </extensionElements>
+    </dataObject>
+    <textAnnotation id="TextAnnotation_1voea0d">
+      <text>changed validator - com.company.workflow.delete.DeleteReviewValidator</text>
+    </textAnnotation>
+    <association id="Association_0kr8qp5" sourceRef="deleteReview" targetRef="TextAnnotation_1voea0d" />
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_recommendForDelete">
+    <bpmndi:BPMNPlane id="BPMNPlane_recommendForDelete" bpmnElement="recommendForDelete">
+      <bpmndi:BPMNShape id="TextAnnotation_1voea0d_di" bpmnElement="TextAnnotation_1voea0d">
+        <omgdc:Bounds x="140" y="140" width="414" height="32" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_startevent1" bpmnElement="startevent1">
+        <omgdc:Bounds x="30" y="233" width="35" height="35" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_deleteReview" bpmnElement="deleteReview">
+        <omgdc:Bounds x="130" y="220" width="105" height="61" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_DeleteService" bpmnElement="DeleteService">
+        <omgdc:Bounds x="390" y="223" width="105" height="55" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_exclusivegateway1" bpmnElement="exclusivegateway1" isMarkerVisible="true">
+        <omgdc:Bounds x="283" y="230" width="40" height="40" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_endevent1" bpmnElement="endevent1">
+        <omgdc:Bounds x="540" y="233" width="35" height="35" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_0kr8qp5_di" bpmnElement="Association_0kr8qp5">
+        <omgdi:waypoint x="185" y="220" />
+        <omgdi:waypoint x="189" y="172" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_flow1" bpmnElement="flow1">
+        <omgdi:waypoint x="65" y="250" />
+        <omgdi:waypoint x="130" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_Delete" bpmnElement="Delete">
+        <omgdi:waypoint x="323" y="250" />
+        <omgdi:waypoint x="390" y="250" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="333" y="250" width="30" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_flow2" bpmnElement="flow2">
+        <omgdi:waypoint x="235" y="250" />
+        <omgdi:waypoint x="283" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_flow3" bpmnElement="flow3">
+        <omgdi:waypoint x="495" y="250" />
+        <omgdi:waypoint x="540" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_Cancel" bpmnElement="Cancel">
+        <omgdi:waypoint x="303" y="270" />
+        <omgdi:waypoint x="303" y="338" />
+        <omgdi:waypoint x="557" y="338" />
+        <omgdi:waypoint x="557" y="268" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="393" y="319" width="33" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath"
+             targetNamespace="http://www.activiti.org/test">
+    <process id="recommendForDelete" name="Recommend for Delete" isExecutable="true">
+        <startEvent id="startevent1" name="Start"></startEvent>
+        <userTask id="deleteReview" name="Delete Review" activiti:dueDate="P2D"
+                  activiti:candidateGroups="ROLE_REVIEWER">
+            <extensionElements>
+                <activiti:formProperty id="decision" name="Decision" type="enum" default="Delete" required="true">
+                    <activiti:value id="Delete" name="Delete"></activiti:value>
+                    <activiti:value id="Cancel" name="Cancel"></activiti:value>
+                </activiti:formProperty>
+                <activiti:formProperty id="accessTypes" name="AccessTypes" type="string" default="DELETE,READ"
+                                       writable="false"></activiti:formProperty>
+                <activiti:formProperty id="validator" name="Validator" type="string"
+                                       default="com.company.workflow.delete.DeleteReviewValidatorWithService"
+                                       writable="false"></activiti:formProperty>
+                <activiti:formProperty id="notificationOnAssignmentEnabled" name="NotificationOnAssignmentEnabled"
+                                       type="boolean" default="true" writable="false"></activiti:formProperty>
+                <activiti:formProperty id="notificationOnCompletionEnabled" name="NotificationOnCompletionEnabled"
+                                       type="boolean" default="true" writable="false"></activiti:formProperty>
+                <activiti:taskListener event="create"
+                                       class="com.reltio.workflow.activiti.service.TaskStartEventListener"></activiti:taskListener>
+                <activiti:taskListener event="assignment"
+                                       class="com.reltio.workflow.activiti.service.TaskAssignmentEventListener"></activiti:taskListener>
+            </extensionElements>
+        </userTask>
+        <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="deleteReview"></sequenceFlow>
+        <serviceTask id="DeleteService" name="Delete Service"
+                     activiti:class="com.reltio.workflow.activiti.service.Delete"></serviceTask>
+        <sequenceFlow id="Delete" name="Delete" sourceRef="exclusivegateway1" targetRef="DeleteService">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[${decision=='Delete'}]]></conditionExpression>
+        </sequenceFlow>
+        <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
+        <sequenceFlow id="flow2" sourceRef="deleteReview" targetRef="exclusivegateway1"></sequenceFlow>
+        <endEvent id="endevent1" name="End"></endEvent>
+        <sequenceFlow id="flow3" sourceRef="DeleteService" targetRef="endevent1"></sequenceFlow>
+        <sequenceFlow id="Cancel" name="Cancel" sourceRef="exclusivegateway1" targetRef="endevent1">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[${decision=='Cancel'}]]></conditionExpression>
+        </sequenceFlow>
+        <dataObject id="manualStart" name="manualStart" itemSubjectRef="xsd:boolean">
+            <extensionElements>
+                <activiti:value>true</activiti:value>
+            </extensionElements>
+        </dataObject>
+        <dataObject id="deleted" name="deleted" itemSubjectRef="xsd:boolean">
+            <extensionElements>
+                <activiti:value>false</activiti:value>
+            </extensionElements>
+        </dataObject>
+    </process>
+    <bpmndi:BPMNDiagram id="BPMNDiagram_recommendForDelete">
+        <bpmndi:BPMNPlane bpmnElement="recommendForDelete" id="BPMNPlane_recommendForDelete">
+            <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+                <omgdc:Bounds height="35.0" width="35.0" x="30.0" y="233.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="deleteReview" id="BPMNShape_deleteReview">
+                <omgdc:Bounds height="61.0" width="105.0" x="130.0" y="220.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="DeleteService" id="BPMNShape_DeleteService">
+                <omgdc:Bounds height="55.0" width="105.0" x="390.0" y="223.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="exclusivegateway1" id="BPMNShape_exclusivegateway1">
+                <omgdc:Bounds height="40.0" width="40.0" x="283.0" y="230.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
+                <omgdc:Bounds height="35.0" width="35.0" x="540.0" y="233.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
+                <omgdi:waypoint x="65.0" y="250.0"></omgdi:waypoint>
+                <omgdi:waypoint x="130.0" y="250.0"></omgdi:waypoint>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge bpmnElement="Delete" id="BPMNEdge_Delete">
+                <omgdi:waypoint x="323.0" y="250.0"></omgdi:waypoint>
+                <omgdi:waypoint x="390.0" y="250.0"></omgdi:waypoint>
+                <bpmndi:BPMNLabel>
+                    <omgdc:Bounds height="14.0" width="30.0" x="333.0" y="250.0"></omgdc:Bounds>
+                </bpmndi:BPMNLabel>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge bpmnElement="flow2" id="BPMNEdge_flow2">
+                <omgdi:waypoint x="235.0" y="250.0"></omgdi:waypoint>
+                <omgdi:waypoint x="283.0" y="250.0"></omgdi:waypoint>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3">
+                <omgdi:waypoint x="495.0" y="250.0"></omgdi:waypoint>
+                <omgdi:waypoint x="540.0" y="250.0"></omgdi:waypoint>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge bpmnElement="Cancel" id="BPMNEdge_Cancel">
+                <omgdi:waypoint x="303.0" y="270.0"></omgdi:waypoint>
+                <omgdi:waypoint x="303.0" y="338.0"></omgdi:waypoint>
+                <omgdi:waypoint x="557.0" y="338.0"></omgdi:waypoint>
+                <omgdi:waypoint x="557.0" y="268.0"></omgdi:waypoint>
+                <bpmndi:BPMNLabel>
+                    <omgdc:Bounds height="14.0" width="33.0" x="393.0" y="319.0"></omgdc:Bounds>
+                </bpmndi:BPMNLabel>
+            </bpmndi:BPMNEdge>
+        </bpmndi:BPMNPlane>
+    </bpmndi:BPMNDiagram>
+</definitions>

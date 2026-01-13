@@ -1,0 +1,62 @@
+{
+  "uri": "changeRequests/0B8Kqx3",
+  "changes": {
+    "entities/0BP3ZSn": [
+      {
+        "id": "0B8KvDJ",
+        "type": "CREATE_ENTITY",
+        "newValue": {
+          "uri": "entities/0BP3ZSn",
+          "type": "configuration/entityTypes/HCO",
+          "attributes": {
+            "Name": [
+              {
+                "value": "Org 3"
+              }
+            ]
+          },
+          "crosswalks": [
+            {
+              "type": "configuration/sources/Reltio",
+              "value": "0BP3ZSn",
+              "dataProvider": true
+            }
+          ]
+        }
+      }
+    ],
+    "entities/XYZ": [
+      {
+        "id": "0B8KzTZ",
+        "type": "CREATE_ENTITY",
+        "newValue": {
+          "uri": "entities/XYZ",
+          "type": "configuration/entityTypes/HCP",
+          "attributes": {
+            "FirstName": [
+              {
+                "value": "Name1"
+              }
+            ],
+            "LastName": [
+              {
+                "value": "Name2"
+              }
+            ]
+          },
+          "isFavorite": false,
+          "crosswalks": [
+            {
+              "type": "configuration/sources/Reltio",
+              "value": "XYZ",
+              "dataProvider": true
+            }
+          ],
+          "analyticsAttributes": {}
+        }
+      }
+    ]
+  },
+  "type": "configuration/changeRequestTypes/default",
+  "state": "AWAITING_REVIEW"
+}

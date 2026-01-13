@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:activiti="http://activiti.org/bpmn" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.activiti.org/test" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="12.0.0">
+  <process id="dataChangeRequestReview" name="Data Change Request Review" isExecutable="true">
+    <startEvent id="startevent1" name="Start">
+      <extensionElements>
+        <activiti:executionListener class="com.reltio.workflow.activiti.service.DCRHasChangesListener" event="start" />
+      </extensionElements>
+    </startEvent>
+    <userTask id="dcrReview" name="DCR Review" activiti:candidateGroups="ROLE_REVIEWER" activiti:dueDate="P2D">
+      <extensionElements>
+        <activiti:formProperty id="decision" name="Decision" type="enum" required="true" default="Approve">
+          <activiti:value id="Approve" name="Approve" />
+          <activiti:value id="Reject" name="Reject" />
+        </activiti:formProperty>
+        <activiti:formProperty id="accessTypes" name="AccessTypes" type="string" writable="false" default="ACCEPT_CHANGE_REQUEST" />
+        <activiti:formProperty id="validator" name="Validator" type="string" writable="false" default="com.reltio.workflow.core.task.validator.DataChangeRequestValidator" />
+        <activiti:formProperty id="notificationOnAssignmentEnabled" name="NotificationOnAssignmentEnabled" type="boolean" writable="false" default="true" />
+        <activiti:formProperty id="notificationOnCompletionEnabled" name="NotificationOnCompletionEnabled" type="boolean" writable="false" default="true" />
+        <activiti:taskListener class="com.reltio.workflow.activiti.service.TaskStartEventListener" event="create" />
+        <activiti:taskListener class="com.reltio.workflow.activiti.service.DCRTypeTaskListener" event="create" />
+        <activiti:taskListener class="com.reltio.workflow.activiti.service.TaskAssignmentEventListener" event="assignment" />
+        <activiti:taskListener class="com.reltio.workflow.custom.notifications.TaskInfoSaver" event="assignment" />
+      </extensionElements>
+      <outgoing>SequenceFlow_1dqoz9h</outgoing>
+    </userTask>
+    <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="dcrReview" />
+    <serviceTask id="ApproveService" name="Approve Service" activiti:class="com.reltio.workflow.activiti.service.ChangeRequestApply">
+      <outgoing>SequenceFlow_1y1k5q4</outgoing>
+    </serviceTask>
+    <sequenceFlow id="Approve" name="Approve" sourceRef="exclusivegateway1" targetRef="ApproveService">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${decision=='Approve'}]]></conditionExpression>
+    </sequenceFlow>
+    <serviceTask id="RejectService" name="Reject Service" activiti:class="com.reltio.workflow.activiti.service.ChangeRequestReject">
+      <outgoing>SequenceFlow_1ljoqtl</outgoing>
+    </serviceTask>
+    <sequenceFlow id="Reject" name="Reject" sourceRef="exclusivegateway1" targetRef="RejectService">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${decision=='Reject'}]]></conditionExpression>
+    </sequenceFlow>
+    <endEvent id="endevent1" name="End">
+      <incoming>SequenceFlow_1y1k5q4</incoming>
+      <incoming>SequenceFlow_1ljoqtl</incoming>
+      <incoming>SequenceFlow_0sfu7jr</incoming>
+    </endEvent>
+    <dataObject id="manualStart" name="manualStart">
+      <extensionElements>
+        <activiti:value>false</activiti:value>
+      </extensionElements>
+    </dataObject>
+    <dataObject id="deleted" name="deleted">
+      <extensionElements>
+        <activiti:value>false</activiti:value>
+      </extensionElements>
+    </dataObject>
+    <boundaryEvent id="OverdueTimer" cancelActivity="false" attachedToRef="dcrReview">
+      <outgoing>SequenceFlow_182s2ho</outgoing>
+      <timerEventDefinition>
+        <!-- Unbounded daily -->
+        <timeDuration xsi:type="tExpression">P2D</timeDuration>
+      </timerEventDefinition>
+    </boundaryEvent>
+    <serviceTask id="overdueNotification" name="Due date escalation" activiti:class="com.reltio.workflow.custom.notifications.OverdueNotification">
+      <incoming>SequenceFlow_182s2ho</incoming>
+      <outgoing>SequenceFlow_0sfu7jr</outgoing>
+    </serviceTask>
+    <sequenceFlow id="SequenceFlow_182s2ho" sourceRef="OverdueTimer" targetRef="overdueNotification" />
+    <sequenceFlow id="SequenceFlow_1dqoz9h" sourceRef="dcrReview" targetRef="exclusivegateway1" />
+    <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway">
+      <incoming>SequenceFlow_1dqoz9h</incoming>
+      <outgoing>Approve</outgoing>
+      <outgoing>Reject</outgoing>
+    </exclusiveGateway>
+    <sequenceFlow id="SequenceFlow_1y1k5q4" sourceRef="ApproveService" targetRef="endevent1" />
+    <sequenceFlow id="SequenceFlow_1ljoqtl" sourceRef="RejectService" targetRef="endevent1" />
+    <sequenceFlow id="SequenceFlow_0sfu7jr" sourceRef="overdueNotification" targetRef="endevent1" />
+    <textAnnotation id="TextAnnotation_0ihwr95">
+      <text>Due date expiration timer</text>
+    </textAnnotation>
+    <association id="Association_14zqppw" sourceRef="OverdueTimer" targetRef="TextAnnotation_0ihwr95" />
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_dataChangeRequestReview">
+    <bpmndi:BPMNPlane id="BPMNPlane_dataChangeRequestReview" bpmnElement="dataChangeRequestReview">
+      <bpmndi:BPMNShape id="BPMNShape_startevent1" bpmnElement="startevent1">
+        <omgdc:Bounds x="31" y="90" width="35" height="35" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="38" y="65" width="24" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_dcrReview" bpmnElement="dcrReview">
+        <omgdc:Bounds x="225" y="80" width="105" height="55" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_ApproveService" bpmnElement="ApproveService">
+        <omgdc:Bounds x="530" y="80" width="105" height="55" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_RejectService" bpmnElement="RejectService">
+        <omgdc:Bounds x="530" y="180" width="105" height="55" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_endevent1" bpmnElement="endevent1">
+        <omgdc:Bounds x="718" y="143" width="35" height="35" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="726" y="116" width="20" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="OverdueTimer_di" bpmnElement="OverdueTimer">
+        <omgdc:Bounds x="257" y="117" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="230" y="153" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="BPMNEdge_flow1" bpmnElement="flow1">
+        <omgdi:waypoint xsi:type="omgdc:Point" x="66" y="108" />
+        <omgdi:waypoint xsi:type="omgdc:Point" x="225" y="106" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="100.5" y="82" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_Approve" bpmnElement="Approve">
+        <omgdi:waypoint xsi:type="omgdc:Point" x="465" y="108" />
+        <omgdi:waypoint xsi:type="omgdc:Point" x="530" y="107" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="477.3957629894743" y="86.00025234480213" width="42" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_Reject" bpmnElement="Reject">
+        <omgdi:waypoint xsi:type="omgdc:Point" x="440" y="133" />
+        <omgdi:waypoint xsi:type="omgdc:Point" x="440" y="207" />
+        <omgdi:waypoint xsi:type="omgdc:Point" x="530" y="207" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="471" y="184" width="33" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_10490vm_di" bpmnElement="overdueNotification">
+        <omgdc:Bounds x="533" y="267" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_182s2ho_di" bpmnElement="SequenceFlow_182s2ho">
+        <omgdi:waypoint xsi:type="omgdc:Point" x="275" y="153" />
+        <omgdi:waypoint xsi:type="omgdc:Point" x="275" y="307" />
+        <omgdi:waypoint xsi:type="omgdc:Point" x="533" y="307" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="245" y="224" width="90" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_0ihwr95_di" bpmnElement="TextAnnotation_0ihwr95">
+        <omgdc:Bounds x="149" y="157" width="101" height="43" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_14zqppw_di" bpmnElement="Association_14zqppw">
+        <omgdi:waypoint xsi:type="omgdc:Point" x="259" y="143" />
+        <omgdi:waypoint xsi:type="omgdc:Point" x="238" y="157" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1dqoz9h_di" bpmnElement="SequenceFlow_1dqoz9h">
+        <omgdi:waypoint xsi:type="omgdc:Point" x="330" y="108" />
+        <omgdi:waypoint xsi:type="omgdc:Point" x="415" y="108" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="372.5" y="87" width="0" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ExclusiveGateway_03gs18v_di" bpmnElement="exclusivegateway1" isMarkerVisible="true">
+        <omgdc:Bounds x="415" y="83" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="417" y="52" width="48" height="24" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1y1k5q4_di" bpmnElement="SequenceFlow_1y1k5q4">
+        <omgdi:waypoint xsi:type="omgdc:Point" x="635" y="108" />
+        <omgdi:waypoint xsi:type="omgdc:Point" x="736" y="108" />
+        <omgdi:waypoint xsi:type="omgdc:Point" x="736" y="143" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="685.5" y="87" width="0" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1ljoqtl_di" bpmnElement="SequenceFlow_1ljoqtl">
+        <omgdi:waypoint xsi:type="omgdc:Point" x="635" y="208" />
+        <omgdi:waypoint xsi:type="omgdc:Point" x="736" y="208" />
+        <omgdi:waypoint xsi:type="omgdc:Point" x="736" y="178" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="685.5" y="187" width="0" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0sfu7jr_di" bpmnElement="SequenceFlow_0sfu7jr">
+        <omgdi:waypoint xsi:type="omgdc:Point" x="633" y="307" />
+        <omgdi:waypoint xsi:type="omgdc:Point" x="791" y="307" />
+        <omgdi:waypoint xsi:type="omgdc:Point" x="791" y="161" />
+        <omgdi:waypoint xsi:type="omgdc:Point" x="753" y="161" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="806" y="228" width="0" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

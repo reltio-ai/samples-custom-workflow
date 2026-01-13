@@ -1,0 +1,9 @@
+image: maven:3.6.3-openjdk-17
+clone:
+  depth: full
+pipelines:
+  custom:
+    pr-checks:
+      import: reltio-custom-workflows:master:export-pr-checks
+    deploy:
+      import: reltio-custom-workflows:master:export-deploy
